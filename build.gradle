@@ -1,0 +1,29 @@
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.6.1'
+    }
+}
+
+subprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+ext {
+    project.ext.versionCode = project.KLIP_SDK_VERSION_CODE.toInteger()
+    project.version = project.KLIP_SDK_VERSION_NAME
+}
+
+apply from: "$rootDir/zip.gradle"

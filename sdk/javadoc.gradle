@@ -1,0 +1,16 @@
+task createJavadocs (type: Javadoc) {
+    source = project.android.sourceSets.main.java.srcDirs
+    classpath += project.files(project.android.getBootClasspath().join(File.pathSeparator))
+
+    destinationDir = file("${rootProject.projectDir}/build/docs/")
+    title = "Klip Android SDK - $rootProject.version"
+    description "Generates Javadoc for Klip Android SDK - ${project.version}."
+
+    options {
+        locale = 'en_US'
+        encoding = 'UTF-8'
+        charSet = 'UTF-8'
+        author = false
+        noDeprecated = true
+    }
+}

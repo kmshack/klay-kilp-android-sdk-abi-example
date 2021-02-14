@@ -1,0 +1,3 @@
+rootProject.name='klip-sdk'
+include ':app'
+include ':sdk'

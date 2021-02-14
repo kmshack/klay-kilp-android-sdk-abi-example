@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.klipwallet.app2app" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application>
+        <meta-data
+            android:name="com.klipwallet.app2app.Phase"
+            android:value="dev" />
+    </application>
+</manifest>

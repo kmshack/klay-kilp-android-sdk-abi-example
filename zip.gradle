@@ -1,0 +1,73 @@
+import org.apache.tools.ant.filters.ConcatFilter
+
+task cleanTask {
+    doLast {
+        println 'clean build/ dir for copying and zipping full source...'
+        delete DIST_DIR
+    }
+}
+
+task bumpVersionInProperties {
+    doLast {
+        if (!project.hasProperty('KLIP_SDK_VERSION_NAME')) {
+            println "There is no KLIP_SDK_VERSION_NAME in gradle.properties.."
+            return
+        }
+
+        if (rootProject.version.startsWith(project.property("KLIP_SDK_VERSION_NAME")) && project.property("KLIP_SDK_VERSION_CODE").toInteger() == rootProject.versionCode) {
+            return
+        }
+        ant.propertyfile(file: "${rootProject.projectDir}/gradle.properties") {
+            if (rootProject.hasProperty('KLIP_SDK_VERSION_NAME')) {
+                println "bumping KLIP_SDK_VERSION_NAME to ${rootProject.version}"
+                entry(key: 'KLIP_SDK_VERSION_CODE', value: rootProject.versionCode)
+                entry(key: 'KLIP_SDK_VERSION_NAME', value: rootProject.version)
+            }
+        }
+    }
+}
+
+task copyFullSource(dependsOn: [cleanTask, bumpVersionInProperties]) {
+    doLast {
+        copy {
+            from '.'
+            into project.DIST_FULL_SOURCE_DIR
+            exclude project.DIST_DIR
+            exclude relativePath(project.buildDir)
+            exclude '.*'
+            exclude '**/*.iml'
+            exclude '**/*.sh'
+            exclude '**/.build'
+            exclude '**/build'
+            exclude '**/.DS_Store'
+            exclude '_gradle.properties'
+            exclude '**/_*'
+            exclude '**/*.css'
+        }
+
+        copy {
+            from '.'
+            include "**/_*"
+            includeEmptyDirs = false
+            into project.DIST_FULL_SOURCE_DIR
+            rename ~/_(.*)/, '$1'
+        }
+
+        String content = ""
+        String protocolDir = "sdk/src/main/java/com/klipwallet/app2app/api"
+        File proFile = new File("${project.DIST_FULL_SOURCE_DIR}/${protocolDir}/KlipProtocol.java")
+        proFile.readLines().each { String line ->
+            if (line.contains("_KlipProtocol")) {
+                line = line.replaceAll("_KlipProtocol", "KlipProtocol")
+            }
+            content = content.concat(line + '\n')
+        }
+        proFile.write(content)
+    }
+}
+
+task zipFullSource(type: Zip, dependsOn: copyFullSource) {
+    from project.DIST_FULL_SOURCE_DIR
+    destinationDirectory = file(project.DIST_DIR)
+    archiveFileName = "klip-a2a-sdk-android-v" + project.version + ".zip"
+}
